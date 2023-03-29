@@ -118,7 +118,15 @@ const App = () => {
                         }}>
                         km/h
                       </Text>
-
+                      <View style={styles.infoBar}>
+                      <View
+                        style={{
+                          width: location.wind/2,
+                          height: 5,
+                          backgroundColor: 'rgba(0,255,0,0.5)',
+                        }}
+                      />
+                      </View>
                     </View>
                     {/* Rain */}
                     <View style={{ justifyContent: 'space-between' }}>
@@ -140,7 +148,11 @@ const App = () => {
                         %
                       </Text>
                       <View style={styles.infoBar}>
-                        <View style={styles.fillBar} />
+                        <View
+                          style={{
+                            width: location.rain / 2,
+                            height: 5,
+                            backgroundColor: 'rgba(255,0,0,0.5)',}} />
                       </View>
                     </View>
                     {/* Humidity */}
@@ -163,7 +175,13 @@ const App = () => {
                         %
                       </Text>
                       <View style={styles.infoBar}>
-                        <View style={styles.fillBar} />
+                        <View
+                          style={{
+                            width: location.humidity / 2,
+                            height: 5,
+                            backgroundColor: 'rgba(255,0,0,0.5)',
+                          }}
+                        />
                       </View>
                     </View>
                   </View>
@@ -175,6 +193,7 @@ const App = () => {
       </ScrollView>
       <View style={styles.appHeader}>
         <TouchableOpacity onPress={() => { }}>
+          <SearchIcon width={24} height={24} fill="#fff" />
           <MenuIcon width={24} height={24} fill="#fff" />
         </TouchableOpacity>
       </View>
@@ -241,7 +260,7 @@ const styles = StyleSheet.create({
   fillBar: {
     width: 35,
     height: 5,
-    backgroundColor: 'rgba(0,255,0,0.5)',
+    backgroundColor: 'rgba(255,0,0,0.5)',
   },
   infoText: {
     color: '#fff',
