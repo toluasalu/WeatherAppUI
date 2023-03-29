@@ -1,120 +1,282 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
+import React, { useRef } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
   View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ImageBackground,
+  useWindowDimensions,
+  StatusBar,
+  ImageSourcePropType,
+  Animated,
+  Touchable,
+  TouchableOpacity,
 } from 'react-native';
+import Locations from './model/locations';
+import { getStatusBarHeight } from 'react-native-status-bar-height';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import SunIcon from './assets/sun.svg';
+import RainIcon from './assets/rain.svg';
+import MoonIcon from './assets/moon.svg';
+import CloudyIcon from './assets/cloudy.svg';
+import MenuIcon from './assets/menu.svg';
+import SearchIcon from './assets/search.svg';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const WeatherIcon = (weatherType) => {
+  if (weatherType === 'Sunny') {
+    return <SunIcon width={34} height={34} fill="#fff" />;
+  }
+  if (weatherType === 'Cloudy') {
+    return <CloudyIcon width={34} height={34} fill="#fff" />;
+  }
+  if (weatherType === 'Rainy') {
+    return <RainIcon width={34} height={34} fill="#fff" />;
+  }
+  if (weatherType === 'Night') {
+    return <MoonIcon width={34} height={34} fill="#fff" />;
+  }
+};
 
-function Section({children, title}: SectionProps): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const App = () => {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const scrollX = useRef(new Animated.Value(0)).current;
+
+  let bgImg: ImageSourcePropType;
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
+    <>
       <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+        horizontal={true}
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false },
+        )}
+        scrollEventThrottle={1}>
+        <StatusBar backgroundColor="transparent" translucent={true} />
+        {Locations.map((location, index) => {
+          if (location.weatherType === 'Sunny') {
+            bgImg = require('./assets/sunny.jpeg');
+          } else if (location.weatherType === 'Night') {
+            bgImg = require('./assets/night2.jpeg');
+          } else if (location.weatherType === 'Cloudy') {
+            bgImg = require('./assets/cloudy.jpeg');
+          } else if (location.weatherType === 'Rainy') {
+            bgImg = require('./assets/rainy.jpeg');
+          }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: 'bold',
-    fontFamily: 'Lato-Regular',
-    fontSize: 22,
-  },
-});
+          return (
+            <View style={{ width: windowWidth, height: windowHeight }} key={index}>
+              <ImageBackground
+                source={bgImg}
+                style={{
+                  flex: 1,
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    padding: 20,
+                  }}>
+                  <View style={styles.topInfoWrapper}>
+                    <View>
+                      <Text style={styles.city}>{location.city}</Text>
+                      <Text style={styles.date}>{location.dateTime}</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.temp}>{location.temperature}</Text>
+                      <View style={{ flexDirection: 'row' }}>
+                        {WeatherIcon(location.weatherType)}
+                        <Text style={styles.weather}> {location.weatherType}</Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      borderBottomColor: 'rgba(255,255,255,0.7)',
+                      marginTop: 20,
+                      borderBottomWidth: 1,
+                    }}
+                  />
+                  <View style={styles.bottomInfoWrapper}>
+                    {/* Wind */}
+                    <View style={{ justifyContent: 'space-between' }}>
+                      <Text style={styles.infoText}>Wind</Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontSize: 24,
+                          fontFamily: 'Lato-Regular',
+                        }}>
+                        {location.wind}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontFamily: 'Lato-Light',
+                          fontSize: 24,
+                        }}>
+                        km/h
+                      </Text>
+
+                    </View>
+                    {/* Rain */}
+                    <View style={{ justifyContent: 'space-between' }}>
+                      <Text style={styles.infoText}>Rain</Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontFamily: 'Lato-Regular',
+                          fontSize: 24,
+                        }}>
+                        {location.rain}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontFamily: 'Lato-Light',
+                          fontSize: 24,
+                        }}>
+                        %
+                      </Text>
+                      <View style={styles.infoBar}>
+                        <View style={styles.fillBar} />
+                      </View>
+                    </View>
+                    {/* Humidity */}
+                    <View style={{ justifyContent: 'space-between' }}>
+                      <Text style={styles.infoText}>Humidity</Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontFamily: 'Lato-Regular',
+                          fontSize: 24,
+                        }}>
+                        {location.humidity}
+                      </Text>
+                      <Text
+                        style={{
+                          color: '#fff',
+                          fontFamily: 'Lato-Light',
+                          fontSize: 24,
+                        }}>
+                        %
+                      </Text>
+                      <View style={styles.infoBar}>
+                        <View style={styles.fillBar} />
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              </ImageBackground>
+            </View>
+          );
+        })}
+      </ScrollView>
+      <View style={styles.appHeader}>
+        <TouchableOpacity onPress={() => { }}>
+          <MenuIcon width={24} height={24} fill="#fff" />
+        </TouchableOpacity>
+      </View>
+      <View
+        style={{
+          position: 'absolute',
+          top: 140,
+          left: 20,
+          flexDirection: 'row',
+        }}>
+        {Locations.map((location, index) => {
+          const width = scrollX.interpolate({
+            inputRange: [
+              windowWidth * (index - 1),
+              windowWidth * index,
+              windowWidth * (index + 1),
+            ],
+            outputRange: [5, 12, 5],
+            extrapolate: 'clamp',
+          });
+
+          return (
+            <Animated.View key={index} style={[styles.normalDot, { width }]} />
+          );
+        })}
+      </View>
+    </>
+  );
+};
 
 export default App;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appHeader: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    height: getStatusBarHeight() + 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: 20,
+  },
+  topInfoWrapper: {
+    flex: 1,
+    marginTop: 160,
+    justifyContent: 'space-between',
+  },
+  bottomInfoWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 20,
+  },
+  infoBar: {
+    width: 45,
+    height: 5,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  fillBar: {
+    width: 35,
+    height: 5,
+    backgroundColor: 'rgba(0,255,0,0.5)',
+  },
+  infoText: {
+    color: '#fff',
+    fontSize: 15,
+    fontFamily: 'Lato-Regular',
+    fontWeight: 'bold',
+  },
+  normalDot: {
+    height: 5,
+    width: 5,
+    borderRadius: 4,
+    marginHorizontal: 4,
+    backgroundColor: '#fff',
+  },
+  city: {
+    color: '#fff',
+    fontSize: 30,
+    fontFamily: 'Lato-Regular',
+    fontWeight: 'bold',
+  },
+  date: {
+    color: '#fff',
+    fontFamily: 'Lato-Regular',
+  },
+  temp: {
+    color: '#fff',
+    fontFamily: 'Lato-Light',
+    fontSize: 85,
+  },
+  weather: {
+    color: '#fff',
+    fontFamily: 'Lato-Regular',
+    fontWeight: 'bold',
+    fontSize: 25,
+    lineHeight: 34,
+    marginLeft: 10,
+  },
+});
